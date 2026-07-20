@@ -115,15 +115,25 @@ def bruteForceAttackDetector(parsedLogs):
       if key not in bruteForceList:
         bruteForceList[key] = { "failCount" : 1 , "start_time" : log["timestamp_iso"] , "end_time" : log["timestamp_iso"] }
       else:
-        lastTimestamp = datetime.fromisoformat(bruteForceList[key]["end_time"].replace("Z" , "+00:00"))
-        newTimeStamp = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
-        timeDiff = newTimeStamp - lastTimestamp
+        startingTime = datetime.fromisoformat(bruteForceList[key]["start_time"].replace("Z" , "+00:00"))
+        currentTime = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
+        timeDiff = currentTime - startingTime
 
-        # checking for new window
         if timeDiff >= timedelta(minutes=1):
-          bruteForceList[key]["failCount"] = 1
-          bruteForceList[key]["start_time"] = log["timestamp_iso"]
-          bruteForceList[key]["end_time"] = log["timestamp_iso"]
+
+          endingTime = datetime.fromisoformat(bruteForceList[key]["end_time"].replace("Z" , "+00:00"))
+          timeDifference = currentTime - endingTime
+
+          if timeDifference >= timedelta(seconds=15):
+
+            bruteForceList[key]["failCount"] = 1
+            bruteForceList[key]["start_time"] = log["timestamp_iso"]
+            bruteForceList[key]["end_time"] = log["timestamp_iso"]
+
+          else :
+            bruteForceList[key]["failCount"] += 1
+            bruteForceList[key]["end_time"] = log["timestamp_iso"]
+
         else:
           bruteForceList[key]["failCount"] += 1
           bruteForceList[key]["end_time"] = log["timestamp_iso"]

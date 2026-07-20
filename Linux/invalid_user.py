@@ -31,19 +31,34 @@ def invalidUserDetector(parsed_logs):
     if key not in invalidUserList:
       invalidUserList[key] = { "failCount" : 1 , "users" : {log["user"]} , "start_time" : log["timestamp_iso"] , "end_time" : log["timestamp_iso"] }
     else:
-      lastTimestamp = datetime.fromisoformat(invalidUserList[key]["end_time"].replace("Z" , "+00:00"))
-      newTimeStamp = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
-      timeDiff = newTimeStamp - lastTimestamp
+      startingTime = datetime.fromisoformat(invalidUserList[key]["start_time"].replace("Z" , "+00:00"))
+      currentTime = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
+      timeDiff = currentTime - startingTime
 
       if timeDiff >= timedelta(minutes=1):
-        invalidUserList[key]["failCount"] = 1
-        invalidUserList[key]["users"] = {log["user"]}
-        invalidUserList[key]["start_time"] = log["timestamp_iso"]
-        invalidUserList[key]["end_time"] = log["timestamp_iso"]
+
+        endingTime = datetime.fromisoformat(invalidUserList[key]["end_time"].replace("Z" , "+00:00"))
+        timeDifference = currentTime - endingTime
+
+        if timeDifference >= timedelta(seconds=15):
+
+          invalidUserList[key]["failCount"] = 1
+          invalidUserList[key]["users"] = {log["user"]}
+          invalidUserList[key]["start_time"] = log["timestamp_iso"]
+          invalidUserList[key]["end_time"] = log["timestamp_iso"]
+
+        else :
+          invalidUserList[key]["failCount"] += 1
+          invalidUserList[key]["users"].add(log["user"])
+          invalidUserList[key]["end_time"] = log["timestamp_iso"]
+
       else:
         invalidUserList[key]["failCount"] += 1
         invalidUserList[key]["users"].add(log["user"])
         invalidUserList[key]["end_time"] = log["timestamp_iso"]
+
+
+        
     
     if len(invalidUserList[key]["users"]) > 3:
       matchingAlerts = [a for a in alerts if a["key"] == key]

@@ -81,15 +81,27 @@ def passwordSprayingDetector(parsedLogs):
     if key not in passwordSprayingList:
       passwordSprayingList[key] = { "failCount" : 1 , "users" : {log["user"]} , "start_time" : log["timestamp_iso"] , "end_time" : log["timestamp_iso"] }
     else:
-      lastTimestamp = datetime.fromisoformat(passwordSprayingList[key]["end_time"].replace("Z" , "+00:00"))
-      newTimeStamp = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
-      timeDiff = newTimeStamp - lastTimestamp
+      startingTime = datetime.fromisoformat(passwordSprayingList[key]["start_time"].replace("Z" , "+00:00"))
+      currentTime = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
+      timeDiff = currentTime - startingTime
 
       if timeDiff >= timedelta(minutes=1):
-        passwordSprayingList[key]["failCount"] = 1
-        passwordSprayingList[key]["users"] = {log["user"]}
-        passwordSprayingList[key]["start_time"] = log["timestamp_iso"]
-        passwordSprayingList[key]["end_time"] = log["timestamp_iso"]
+
+        endingTime = datetime.fromisoformat(passwordSprayingList[key]["end_time"].replace("Z" , "+00:00"))
+        timeDifference = currentTime - endingTime
+
+        if timeDifference >= timedelta(seconds=45):
+
+          passwordSprayingList[key]["failCount"] = 1
+          passwordSprayingList[key]["users"] = {log["user"]}
+          passwordSprayingList[key]["start_time"] = log["timestamp_iso"]
+          passwordSprayingList[key]["end_time"] = log["timestamp_iso"]
+
+        else :
+          passwordSprayingList[key]["failCount"] += 1
+          passwordSprayingList[key]["users"].add(log["user"])
+          passwordSprayingList[key]["end_time"] = log["timestamp_iso"]
+
       else:
         passwordSprayingList[key]["failCount"] += 1
         passwordSprayingList[key]["users"].add(log["user"])

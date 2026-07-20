@@ -109,19 +109,33 @@ def distributedAttackDetector(parsedLogs):
       if key not in distributedAttackList:
         distributedAttackList[key] = { "failCount" : 1 , "IPs" : {log["source_ip"]} , "start_time" : log["timestamp_iso"] , "end_time" : log["timestamp_iso"] }
       else:
-        lastTimestamp = datetime.fromisoformat(distributedAttackList[key]["end_time"].replace("Z" , "+00:00"))
-        newTimeStamp = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
-        timeDiff = newTimeStamp - lastTimestamp
+        startingTime = datetime.fromisoformat(distributedAttackList[key]["start_time"].replace("Z" , "+00:00"))
+        currentTime = datetime.fromisoformat(log["timestamp_iso"].replace("Z" , "+00:00"))
+        timeDiff = currentTime - startingTime
 
         if timeDiff >= timedelta(minutes=1):
-          distributedAttackList[key]["failCount"] = 1
-          distributedAttackList[key]["IPs"] = {log["source_ip"]}
-          distributedAttackList[key]["start_time"] = log["timestamp_iso"]
-          distributedAttackList[key]["end_time"] = log["timestamp_iso"]
+
+          endingTime = datetime.fromisoformat(distributedAttackList[key]["end_time"].replace("Z" , "+00:00"))
+          timeDifference = currentTime - endingTime
+
+          if timeDifference >= timedelta(seconds=30):
+
+            distributedAttackList[key]["failCount"] = 1
+            distributedAttackList[key]["IPs"] = {log["source_ip"]}
+            distributedAttackList[key]["start_time"] = log["timestamp_iso"]
+            distributedAttackList[key]["end_time"] = log["timestamp_iso"]
+
+          else :
+            distributedAttackList[key]["failCount"] += 1
+            distributedAttackList[key]["IPs"].add(log["source_ip"])
+            distributedAttackList[key]["end_time"] = log["timestamp_iso"]
+
         else:
           distributedAttackList[key]["failCount"] += 1
           distributedAttackList[key]["IPs"].add(log["source_ip"])
           distributedAttackList[key]["end_time"] = log["timestamp_iso"]
+
+          
 
       if len(distributedAttackList[key]["IPs"]) > 3:
         matchingAlerts = [a for a in alerts if a["key"] == key]
