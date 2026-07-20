@@ -124,7 +124,7 @@ def bruteForceAttackDetector(parsedLogs):
           endingTime = datetime.fromisoformat(bruteForceList[key]["end_time"].replace("Z" , "+00:00"))
           timeDifference = currentTime - endingTime
 
-          if timeDifference >= timedelta(seconds=15):
+          if timeDifference > timedelta(seconds=15):
 
             bruteForceList[key]["failCount"] = 1
             bruteForceList[key]["start_time"] = log["timestamp_iso"]

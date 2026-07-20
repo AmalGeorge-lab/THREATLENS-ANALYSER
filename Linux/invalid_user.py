@@ -40,7 +40,7 @@ def invalidUserDetector(parsed_logs):
         endingTime = datetime.fromisoformat(invalidUserList[key]["end_time"].replace("Z" , "+00:00"))
         timeDifference = currentTime - endingTime
 
-        if timeDifference >= timedelta(seconds=15):
+        if timeDifference > timedelta(seconds=15):
 
           invalidUserList[key]["failCount"] = 1
           invalidUserList[key]["users"] = {log["user"]}

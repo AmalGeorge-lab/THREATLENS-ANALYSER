@@ -90,7 +90,7 @@ def passwordSprayingDetector(parsedLogs):
         endingTime = datetime.fromisoformat(passwordSprayingList[key]["end_time"].replace("Z" , "+00:00"))
         timeDifference = currentTime - endingTime
 
-        if timeDifference >= timedelta(seconds=45):
+        if timeDifference > timedelta(seconds=45):
 
           passwordSprayingList[key]["failCount"] = 1
           passwordSprayingList[key]["users"] = {log["user"]}

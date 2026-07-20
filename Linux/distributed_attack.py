@@ -118,7 +118,7 @@ def distributedAttackDetector(parsedLogs):
           endingTime = datetime.fromisoformat(distributedAttackList[key]["end_time"].replace("Z" , "+00:00"))
           timeDifference = currentTime - endingTime
 
-          if timeDifference >= timedelta(seconds=30):
+          if timeDifference > timedelta(seconds=30):
 
             distributedAttackList[key]["failCount"] = 1
             distributedAttackList[key]["IPs"] = {log["source_ip"]}
