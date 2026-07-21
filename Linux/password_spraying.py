@@ -118,7 +118,7 @@ def passwordSprayingDetector(parsedLogs):
         newTimeStamp = datetime.fromisoformat(passwordSprayingList[key]["start_time"].replace("Z" , "+00:00"))
         timeDiff = newTimeStamp - lastTimestamp
 
-        if timeDiff >= timedelta(minutes=1):
+        if timeDiff > timedelta(seconds=45):
 
           alertCounter += 1
           riskAnalysis = calculateRiskScore(passwordSprayingList[key]["failCount"] , len(passwordSprayingList[key]["users"]))

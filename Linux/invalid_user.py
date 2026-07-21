@@ -68,7 +68,7 @@ def invalidUserDetector(parsed_logs):
         newTimeStamp = datetime.fromisoformat(invalidUserList[key]["start_time"].replace("Z" , "+00:00"))
         timeDiff = newTimeStamp - lastTimestamp
 
-        if timeDiff >= timedelta(minutes=1):
+        if timeDiff > timedelta(seconds=15):
 
           alertCounter += 1
           riskAnalysis = calculateRiskScore(invalidUserList[key]["failCount"] , len(invalidUserList[key]["users"]))

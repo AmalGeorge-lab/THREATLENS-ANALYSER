@@ -145,7 +145,7 @@ def distributedAttackDetector(parsedLogs):
           newTimeStamp = datetime.fromisoformat(distributedAttackList[key]["start_time"].replace("Z" , "+00:00"))
           timeDiff = newTimeStamp - lastTimestamp
 
-          if timeDiff >= timedelta(minutes=1):
+          if timeDiff > timedelta(seconds=30):
             alertCounter += 1
             riskAnalysis = calculateRiskScore(distributedAttackList[key]["failCount"] , len(distributedAttackList[key]["IPs"]) , keyExists["user"])
             alerts.append(generate_alert(

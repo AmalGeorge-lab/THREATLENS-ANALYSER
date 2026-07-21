@@ -147,8 +147,8 @@ def bruteForceAttackDetector(parsedLogs):
           lastTimestamp = datetime.fromisoformat(keyExists["ending_time"].replace("Z" , "+00:00"))
           newTimeStamp = datetime.fromisoformat(bruteForceList[key]["start_time"].replace("Z" , "+00:00"))
           timeDiff = newTimeStamp - lastTimestamp
-          # checking whether it is a new alert or not
-          if timeDiff >= timedelta(minutes=1):
+
+          if timeDiff > timedelta(seconds=15):
             alertCounter += 1
             riskAnalysis = calculateRiskScore(bruteForceList[key]["failCount"],keyExists["user"])
             alerts.append(generate_alert(
