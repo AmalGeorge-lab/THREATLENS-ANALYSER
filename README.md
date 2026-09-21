@@ -43,10 +43,32 @@ This project was built to demonstrate:
 
 The Linux authentication module analyzes SSH authentication logs and detects suspicious authentication activity.
 
+
+## Linux Log Parsing
+
 ### Example Log
 
 ```text
 May 27 10:15:01 ubuntu sshd[1234]: Failed password for root from 192.168.1.20 port 45522 ssh2
+```
+
+### Final Parsed Structure
+
+```json
+{
+  "raw_log": "May 27 10:15:01 ubuntu sshd[1234]: Failed password for root from 192.168.1.20 port 45522 ssh2",
+  "log_type": "LINUX_AUTH",
+  "timestamp": "May 27 10:15:01",
+  "timestamp_iso": "2026-05-27T10:15:01Z",
+  "host": "ubuntu",
+  "service": "sshd",
+  "pid": 1234,
+  "event": "FAILED_LOGIN",
+  "user": "root",
+  "source_ip": "192.168.1.20",
+  "port": 45522,
+  "protocol": "ssh2"
+}
 ```
 
 ### Extracted Fields
@@ -84,6 +106,28 @@ May 27 10:15:01 ubuntu sshd[1234]: Failed password for root from 192.168.1.20 po
 | Successful Brute Force Attack - Root  | T1078.003       | Valid Accounts: Local Accounts |
 | Distributed Brute Force Attack        | T1078           | Valid Accounts                 |
 | Distributed Brute Force Attack - Root | T1078.003       | Valid Accounts: Local Accounts |
+
+
+
+## Example Linux Alert Metadata
+
+```json
+{
+  "alert_id": "ALT-1001",
+  "alert_type": "BRUTE_FORCE_ATTACK",
+  "rule_id": "AUTH-001",
+  "rule_name": "Brute Force Detection",
+  "severity": "HIGH",
+  "status": "OPEN",
+  "source_ip": "192.168.1.20",
+  "failed_attempts": 8,
+  "time_window": "5 minutes",
+  "mitre_technique": "T1110",
+  "mitre_name": "Brute Force",
+  "created_at": "2026-05-27T10:20:00Z"
+}
+```
+
 
 ---
 
@@ -131,79 +175,6 @@ The Web Access Log module analyzes HTTP access logs and detects suspicious web r
 * Response Size
 * Referrer
 * User Agent
-
----
-
-## Web Detection Rules
-
-### WEB-001 - Directory Enumeration Detection
-
-Detects repeated requests resulting in `404` responses from the same source IP.
-
-**Detection condition:**
-
-```text
-Same IP
-    ↓
-More than 20 requests
-    ↓
-404 responses
-    ↓
-Within 2 minutes
-    ↓
-Generate Alert
-```
-
-### WEB-002 - Sensitive File Access
-
-Detects requests attempting to access potentially sensitive files.
-
-Examples include:
-
-```text
-.env
-config.php
-backup.zip
-database.sql
-wp-config.php
-```
-
-### WEB-003 - SQL Injection Detection
-
-Detects suspicious SQL injection patterns in request URIs.
-
-Examples include:
-
-```text
---
-UNION SELECT
-OR 1=1
-SLEEP(
-```
-
-### WEB-004 - Web Shell Access Detection
-
-Detects suspicious requests for web shell files or web shell extensions from unusual locations.
-
-Examples of web shell extensions:
-
-```text
-.php
-.jsp
-.asp
-.aspx
-.cgi
-```
-
-Known web shell filenames include:
-
-```text
-cmd.php
-shell.php
-c99.php
-r57.php
-ws.php
-```
 
 ---
 
@@ -297,75 +268,6 @@ May 27 14:25:10 firewall01 kernel: IN=eth0 OUT= MAC=00:11:22:33:44:55 SRC=203.0.
 
 ---
 
-## Firewall Detection Rules
-
-### FW-001 - Port Scanning Detection
-
-Detects a source IP targeting multiple destination ports within a short time window.
-
-**Detection condition:**
-
-```text
-Same Source IP
-      ↓
-More than 20 different destination ports
-      ↓
-Within 5 minutes
-      ↓
-Generate Alert
-```
-
-### FW-002 - Excessive Blocked Connections
-
-Detects excessive firewall `DROP` actions originating from the same source IP.
-
-**Detection condition:**
-
-```text
-Same Source IP
-      ↓
-More than 50 DROP actions
-      ↓
-Within 10 minutes
-      ↓
-Generate Alert
-```
-
-### FW-003 - SSH Targeting Detection
-
-Detects repeated attempts to access SSH services that are blocked by the firewall.
-
-**Detection condition:**
-
-```text
-Destination Port = 22
-        +
-Action = DROP
-        +
-More than 10 attempts
-        +
-Within 5 minutes
-        ↓
-Generate Alert
-```
-
-### FW-004 - Internal Network Access Attempt
-
-Detects external source IPs attempting to access multiple internal hosts within a short time window.
-
-**Detection condition:**
-
-```text
-External Source IP
-       ↓
-Multiple Internal Hosts
-       ↓
-Within 5 minutes
-       ↓
-Generate Alert
-```
-
----
 
 ## Firewall Detection Rules Summary
 
@@ -556,6 +458,8 @@ The platform categorizes detected security events into four severity levels:
 | Critical | Activity requiring immediate investigation due to potentially severe impact |
 
 ---
+
+
 
 # Project Roadmap
 
