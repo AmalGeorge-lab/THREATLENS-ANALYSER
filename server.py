@@ -2,6 +2,8 @@ import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from Linux.main import linux_log_analyser
+from Web.main import web_log_analyser
+from Firewall.main import firewall_log_analyser
 
 #$env:PYTHON_API_KEY="6b4f2e0b8d91c3f4a7e5d9b1c6f8a2e3d7b9c1f4e6a8d0b2c5f7e9a1d3c6b8e"
 # uvicorn server:app --reload --port 4897
@@ -20,10 +22,26 @@ class AnalyseRequest(BaseModel):
   logs: str
 
 
-@app.post("/analyse")
+@app.post("/analyse/linux")
 async def analyser(data: AnalyseRequest,x_api_key: str = Header(None)):
   if x_api_key != API_KEY:
     raise HTTPException(status_code=401,detail="Unauthorized")
 
   alerts = linux_log_analyser(data.logs)
+  return alerts
+
+@app.post("/analyse/web")
+async def analyser(data: AnalyseRequest,x_api_key: str = Header(None)):
+  if x_api_key != API_KEY:
+    raise HTTPException(status_code=401,detail="Unauthorized")
+
+  alerts = web_log_analyser(data.logs)
+  return alerts
+
+@app.post("/analyse/firewall")
+async def analyser(data: AnalyseRequest,x_api_key: str = Header(None)):
+  if x_api_key != API_KEY:
+    raise HTTPException(status_code=401,detail="Unauthorized")
+
+  alerts = firewall_log_analyser(data.logs)
   return alerts
