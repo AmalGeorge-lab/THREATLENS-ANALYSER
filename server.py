@@ -22,6 +22,12 @@ class AnalyseRequest(BaseModel):
   logs: str
 
 
+@app.get("/")
+async def root():
+  return {"status": "ThreatLens Analyzer is running"}
+
+
+
 @app.post("/analyse/linux")
 async def analyser(data: AnalyseRequest,x_api_key: str = Header(None)):
   if x_api_key != API_KEY:
